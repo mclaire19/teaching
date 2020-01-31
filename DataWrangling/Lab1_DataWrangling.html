@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Lab 1 - Data Wrangling</title>
+    <meta charset="utf-8" />
+    <meta name="date" content="2020-01-22" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Lab 1 - Data Wrangling
+## Welcome Back!
+### January 22, 2020
+
+---
+
+# Logistics and Changes from Last Semester
+
+- Labs (and participation in labs) are now mandatory and I will be taking attendance :( BUT you no longer have to submit anything related to labs :)
+
+- Every week 4-5 pm in ON G-02
+
+- Labs will emphasize the tidyverse more than base R
+
+- Labs will be (hopefully) more applied
+
+- Problem set submissions will now also include grading on presentation; plots need to follow visualization principles, code should not be cut off, all code/LaTeX should render correctly, and assignments **must be rendered as a PDF from an R Markdown file** (submit a hard copy of the PDF in class and the PDF version on Canvas)
+
+- Join Slack!
+
+---
+# Shameless Plugs
+
+- RSVP for resume review event by Friday at 5 pm! (https://tinyurl.com/dspp-resume-review)
+
+- Fill out last semester's TA feedback form (or forever hold your peace) (https://tinyurl.com/ta-feedback-560)
+
+---
+# Necessary packages
+
+
+```r
+install.packages('tidyverse')
+library(tidyverse)
+```
+
+
+
+"Umbrella package" that will include `tidyr`, `dplyr`, `ggplot2`, and other useful packages. We'll mostly be working with these three for the next few weeks.
+
+---
+# Disclaimer
+
+- I am mostly self-taught on wrangling in R (affects my pronunciation, code efficiency, etc)
+
+- Will send out resources that I reference regularly; I recommend you refer to these in addition to lab slides/code
+
+- This will probably just be a review of what you covered in class; want to reinforce
+
+---
+# What is Data Wrangling?
+
+--
+Transforming or mapping data from one "raw" form into another form to make it more valuable for analysis.
+
+- Import and export
+- Deal with missing values
+- Subset observations
+- Summarize variables
+- Make new variables
+- Group data
+- Combine data
+
+Use cases for these?
+
+--
+- Import data so that data types are correct
+--
+- Evaluate NA values
+--
+- Focus only on certain variables (subset of columns that meet a condition) or data points (subset of rows that meet a condition)
+--
+- Calculate averages or maximum values for a variable
+--
+- Create a dummy variable indicating whether a condition is true
+--
+- Perform calculations based on group membership
+--
+- Merge a bunch of datasets
+---
+class: center, middle
+
+# Today's Data
+
+---
+# Reading in Data - how does readr parse this file?
+Note the output of `read_csv` is a tibble, not a df
+
+```r
+read_csv('data/fafsa-demographics-2017-18.csv')
+```
+
+```
+## Parsed with column specification:
+## cols(
+##   Variable = col_character(),
+##   `2016Q1` = col_character(),
+##   `2017Q2` = col_character(),
+##   `2017Q3` = col_character(),
+##   `2017Q4` = col_character(),
+##   `2017Q5` = col_character(),
+##   `2018Q6` = col_character(),
+##   `2018Q7+` = col_character(),
+##   `2017_18_InitialTotal` = col_character(),
+##   `2017_18_FinalTransaction` = col_character()
+## )
+```
+
+```
+## # A tibble: 80 x 10
+##    Variable `2016Q1` `2017Q2` `2017Q3` `2017Q4` `2017Q5` `2018Q6` `2018Q7+`
+##    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    
+##  1 Total_A… 5,419,3… 4,985,3… 3,641,3… 2,915,9… 898,769  726,946  381,906  
+##  2 Female   3,346,8… 3,015,8… 2,227,3… 1,731,1… 545,359  445,336  240,077  
+##  3 Male     2,040,1… 1,939,1… 1,388,8… 1,162,8… 340,875  268,456  133,720  
+##  4 Gender_… 32,309   30,284   25,121   21,974   12,535   13,154   8,109    
+##  5 Age_18_… 936,199  466,122  212,314  164,880  74,661   56,099   54,785   
+##  6 19_24    2,722,8… 2,731,0… 1,740,3… 1,310,2… 294,616  219,227  94,380   
+##  7 25_or_G… 1,760,2… 1,788,0… 1,688,6… 1,440,8… 529,478  451,610  232,741  
+##  8 Age_Unk… 11       36       39       39       14       10       0        
+##  9 Enterin… 1,654,9… 1,032,3… 691,205  633,459  269,398  226,261  139,964  
+## 10 Enterin… 721,594  686,923  627,393  600,124  229,219  195,891  97,735   
+## # … with 70 more rows, and 2 more variables: `2017_18_InitialTotal` &lt;chr&gt;,
+## #   `2017_18_FinalTransaction` &lt;chr&gt;
+```
+
+---
+# Reading in Data - specifying NA
+
+```r
+read_csv('data/fafsa-demographics-2017-18.csv', na = "N/A")
+```
+
+```
+## Parsed with column specification:
+## cols(
+##   Variable = col_character(),
+##   `2016Q1` = col_character(),
+##   `2017Q2` = col_character(),
+##   `2017Q3` = col_character(),
+##   `2017Q4` = col_character(),
+##   `2017Q5` = col_character(),
+##   `2018Q6` = col_character(),
+##   `2018Q7+` = col_character(),
+##   `2017_18_InitialTotal` = col_character(),
+##   `2017_18_FinalTransaction` = col_number()
+## )
+```
+
+```
+## # A tibble: 80 x 10
+##    Variable `2016Q1` `2017Q2` `2017Q3` `2017Q4` `2017Q5` `2018Q6` `2018Q7+`
+##    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    
+##  1 Total_A… 5,419,3… 4,985,3… 3,641,3… 2,915,9… 898,769  726,946  381,906  
+##  2 Female   3,346,8… 3,015,8… 2,227,3… 1,731,1… 545,359  445,336  240,077  
+##  3 Male     2,040,1… 1,939,1… 1,388,8… 1,162,8… 340,875  268,456  133,720  
+##  4 Gender_… 32,309   30,284   25,121   21,974   12,535   13,154   8,109    
+##  5 Age_18_… 936,199  466,122  212,314  164,880  74,661   56,099   54,785   
+##  6 19_24    2,722,8… 2,731,0… 1,740,3… 1,310,2… 294,616  219,227  94,380   
+##  7 25_or_G… 1,760,2… 1,788,0… 1,688,6… 1,440,8… 529,478  451,610  232,741  
+##  8 Age_Unk… 11       36       39       39       14       10       0        
+##  9 Enterin… 1,654,9… 1,032,3… 691,205  633,459  269,398  226,261  139,964  
+## 10 Enterin… 721,594  686,923  627,393  600,124  229,219  195,891  97,735   
+## # … with 70 more rows, and 2 more variables: `2017_18_InitialTotal` &lt;chr&gt;,
+## #   `2017_18_FinalTransaction` &lt;dbl&gt;
+```
+---
+# Reading in Data - specifying col types
+
+```r
+read_csv('data/fafsa-demographics-2017-18.csv', na = "N/A",
+           col_types = cols(.default= col_number(),
+                            Variable = col_character()
+  ))
+```
+
+```
+## # A tibble: 80 x 10
+##    Variable `2016Q1` `2017Q2` `2017Q3` `2017Q4` `2017Q5` `2018Q6` `2018Q7+`
+##    &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+##  1 Total_A…  5419318  4985325  3641353  2915999   898769   726946    381906
+##  2 Female    3346859  3015893  2227392  1731193   545359   445336    240077
+##  3 Male      2040150  1939148  1388840  1162832   340875   268456    133720
+##  4 Gender_…    32309    30284    25121    21974    12535    13154      8109
+##  5 Age_18_…   936199   466122   212314   164880    74661    56099     54785
+##  6 19_24     2722824  2731080  1740355  1310278   294616   219227     94380
+##  7 25_or_G…  1760284  1788087  1688645  1440802   529478   451610    232741
+##  8 Age_Unk…       11       36       39       39       14       10         0
+##  9 Enterin…  1654912  1032302   691205   633459   269398   226261    139964
+## 10 Enterin…   721594   686923   627393   600124   229219   195891     97735
+## # … with 70 more rows, and 2 more variables: `2017_18_InitialTotal` &lt;dbl&gt;,
+## #   `2017_18_FinalTransaction` &lt;dbl&gt;
+```
+
+---
+# We have a tibble! What do we notice?
+
+```r
+d &lt;- read_csv('data/fafsa-demographics-2017-18.csv', na = "N/A",
+           col_types = cols(.default= col_number(),
+                            Variable = col_character()
+  ))
+
+head(d)
+```
+
+```
+## # A tibble: 6 x 10
+##   Variable `2016Q1` `2017Q2` `2017Q3` `2017Q4` `2017Q5` `2018Q6` `2018Q7+`
+##   &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+## 1 Total_A…  5419318  4985325  3641353  2915999   898769   726946    381906
+## 2 Female    3346859  3015893  2227392  1731193   545359   445336    240077
+## 3 Male      2040150  1939148  1388840  1162832   340875   268456    133720
+## 4 Gender_…    32309    30284    25121    21974    12535    13154      8109
+## 5 Age_18_…   936199   466122   212314   164880    74661    56099     54785
+## 6 19_24     2722824  2731080  1740355  1310278   294616   219227     94380
+## # … with 2 more variables: `2017_18_InitialTotal` &lt;dbl&gt;,
+## #   `2017_18_FinalTransaction` &lt;dbl&gt;
+```
+
+---
+# "Tidy" Data - What is it?
+
+&gt; There are three interrelated rules which make a dataset tidy:
+
+&gt; - Each variable must have its own column.
+
+&gt; - Each observation must have its own row.
+
+&gt; - Each value must have its own cell.
+ 
+&gt; (Image and Quote from 'R for Data Science', Hadley Wickham')
+
+![From 'R for Data Science', Hadley Wickham](tidy_data.png)
+---
+# What do we need to do to make this data tidy?
+
+```r
+head(d)
+```
+
+```
+## # A tibble: 6 x 10
+##   Variable `2016Q1` `2017Q2` `2017Q3` `2017Q4` `2017Q5` `2018Q6` `2018Q7+`
+##   &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+## 1 Total_A…  5419318  4985325  3641353  2915999   898769   726946    381906
+## 2 Female    3346859  3015893  2227392  1731193   545359   445336    240077
+## 3 Male      2040150  1939148  1388840  1162832   340875   268456    133720
+## 4 Gender_…    32309    30284    25121    21974    12535    13154      8109
+## 5 Age_18_…   936199   466122   212314   164880    74661    56099     54785
+## 6 19_24     2722824  2731080  1740355  1310278   294616   219227     94380
+## # … with 2 more variables: `2017_18_InitialTotal` &lt;dbl&gt;,
+## #   `2017_18_FinalTransaction` &lt;dbl&gt;
+```
+---
+# Switch rows/columns (currently variables are rows and observations are columns)
+
+```r
+#convert tibble to matrix and transpose
+dmatrix &lt;- t(as.matrix(d))
+
+#select first row of data to serve as column names
+column_names &lt;- dmatrix[1,]
+
+#remove that row in the data
+dmatrix &lt;- dmatrix[-1,]
+
+#add column names in place of R-generated ones
+colnames(dmatrix) &lt;- column_names
+
+#convert transposed matrix back to tibble
+d_transposed &lt;- as_tibble(dmatrix)
+head(d_transposed)
+```
+
+```
+## # A tibble: 6 x 80
+##   Total_AppCount_… Female Male  Gender_Blank Age_18_or_Less `19_24`
+##   &lt;chr&gt;            &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;        &lt;chr&gt;          &lt;chr&gt;  
+## 1 5419318          33468… 2040… "  32309"    " 936199"      2722824
+## 2 4985325          30158… 1939… "  30284"    " 466122"      2731080
+## 3 3641353          22273… 1388… "  25121"    " 212314"      1740355
+## 4 2915999          17311… 1162… "  21974"    " 164880"      1310278
+## 5 898769           545359 3408… " 12535"     " 74661"       294616 
+## 6 726946           445336 2684… " 13154"     " 56099"       219227 
+## # … with 74 more variables: `25_or_Greater` &lt;chr&gt;, Age_Unknown &lt;chr&gt;,
+## #   Entering_Yr1_NACB &lt;chr&gt;, Entering_Yr1_ACB &lt;chr&gt;, Entering_Yr2 &lt;chr&gt;,
+## #   Entering_Yr3 &lt;chr&gt;, Entering_Yr4 &lt;chr&gt;,
+## #   Entering_Yr5_OtherUndergrad &lt;chr&gt;, Entering_Yr1_GradProf &lt;chr&gt;,
+## #   Continuing_GradProf &lt;chr&gt;, Blank_GradeEntering &lt;chr&gt;,
+## #   Pursuing_1B &lt;chr&gt;, Pursuing_2B &lt;chr&gt;, Pursuing_AssocOccTech &lt;chr&gt;,
+## #   Purusing_AssocGenEDTransfer &lt;chr&gt;, Pursuing_CTDipLessthan2 &lt;chr&gt;,
+## #   Pursuing_CTDipAtLeast2 &lt;chr&gt;, Pursuing_TeachingCredNondegree &lt;chr&gt;,
+## #   Pursuing_GradProfDegree &lt;chr&gt;, Pursuing_OtherUndecided &lt;chr&gt;,
+## #   Pursuing_Blank &lt;chr&gt;, Parent_NeitherCollege &lt;chr&gt;,
+## #   Parent_OneCollege &lt;chr&gt;, Parent_BothCollege &lt;chr&gt;,
+## #   Pell_Eligible &lt;chr&gt;, Pell_Ineligible &lt;chr&gt;, Dependent &lt;chr&gt;,
+## #   Independent &lt;chr&gt;, Original_App &lt;chr&gt;, Renewal_App &lt;chr&gt;,
+## #   Source_FOTW &lt;chr&gt;, Source_WebFAA &lt;chr&gt;, Source_OtherElectronic &lt;chr&gt;,
+## #   Source_PaperFAFSA &lt;chr&gt;, Source_PhoneFAFSA_or_FSAICcorrection &lt;chr&gt;,
+## #   FOG1_Schools &lt;chr&gt;, FOG2_Schools &lt;chr&gt;, FOG3_Schools &lt;chr&gt;,
+## #   FOG4_Schools &lt;chr&gt;, FOG5_Schools &lt;chr&gt;, FOG6_Schools &lt;chr&gt;,
+## #   FOG7_Schools &lt;chr&gt;, FOG8_Schools &lt;chr&gt;, FOG9_Schools &lt;chr&gt;,
+## #   FOG10_Schools &lt;chr&gt;, NFOG1_Schools &lt;chr&gt;, NFOG2_Schools &lt;chr&gt;,
+## #   NFOG3_Schools &lt;chr&gt;, NFOG4_Schools &lt;chr&gt;, NFOG5_Schools &lt;chr&gt;,
+## #   NFOG6_Schools &lt;chr&gt;, NFOG7_Schools &lt;chr&gt;, NFOG8_Schools &lt;chr&gt;,
+## #   NFOG9_Schools &lt;chr&gt;, NFOG10_Schools &lt;chr&gt;, Parent_NoTaxes &lt;chr&gt;,
+## #   Parent_NotCompleteTaxes &lt;chr&gt;, Parent_Filed_NoDataXfer &lt;chr&gt;,
+## #   Parent_Filed_DataXfer &lt;chr&gt;, Parent_UnknownFilingStatus &lt;chr&gt;,
+## #   Student_NoTaxes &lt;chr&gt;, Student_NotCompleteTaxes &lt;chr&gt;,
+## #   Student_Filed_NoDataXFer &lt;chr&gt;, Student_Filed_DataXfer &lt;chr&gt;,
+## #   Student_UnknownFilingStatus &lt;chr&gt;,
+## #   All_Applicants_Completion_Times &lt;chr&gt;, Dep_OG_Full_CT &lt;chr&gt;,
+## #   Dep_OG_EZ_CT &lt;chr&gt;, Dep_Ren_Full_CT &lt;chr&gt;, Dep_Ren_EZ_CT &lt;chr&gt;,
+## #   Indep_OG_Full_CT &lt;chr&gt;, Indep_OG_EZ_CT &lt;chr&gt;, Indep_Ren_Full_CT &lt;chr&gt;,
+## #   Indep_Ren_EZ_CT &lt;chr&gt;
+```
+---
+class: center, middle
+# There must be a more efficient way...
+---
+# Pipes!
+
+```r
+x %&gt;% f(y)
+```
+is equivalent to:
+
+
+```r
+f(x,y)
+```
+---
+# The Old (Base R) Way
+
+```r
+# this is pseudocode
+d &lt;- import_data()
+d2 &lt;- operation_on_first_df(d)
+d3 &lt;- operation_on_the_new_df(d2)
+d4 &lt;- operation_on_the_new_new_df(d3)
+d4 &lt;- accidentally_overwriting_a_variable(d2)
+d5 &lt;- repeating_work(d3)
+```
+
+This is essentially what we just did to transpose that matrix
+---
+# The Pipe Way
+
+```r
+#still pseudocode
+d &lt;- import_data() %&gt;%
+  first_operation() %&gt;%
+  second_operation() %&gt;%
+  final_operation()
+```
+
+- No need to save additional variables; less confusion, less computation
+- "Focus on verbs, not nouns" - read code like set of actions rather than series of variables
+
+---
+# Apply the Pipe to transpose the data (you could also use gather/spread)
+
+```r
+d_pipe_transposed &lt;- d %&gt;%      # take original data
+  select(-1) %&gt;%                # remove first column
+                                # (our eventual rownames)
+  t() %&gt;%                       # transpose 
+  data.frame()                  # turn back into data frame
+
+#rename the columns 
+colnames(d_pipe_transposed) &lt;- column_names 
+
+head(d_pipe_transposed)
+```
+
+```
+##        Total_AppCount_2017_18  Female    Male Gender_Blank Age_18_or_Less
+## 2016Q1                5419318 3346859 2040150        32309         936199
+## 2017Q2                4985325 3015893 1939148        30284         466122
+## 2017Q3                3641353 2227392 1388840        25121         212314
+## 2017Q4                2915999 1731193 1162832        21974         164880
+## 2017Q5                 898769  545359  340875        12535          74661
+## 2018Q6                 726946  445336  268456        13154          56099
+##          19_24 25_or_Greater Age_Unknown Entering_Yr1_NACB
+## 2016Q1 2722824       1760284          11           1654912
+## 2017Q2 2731080       1788087          36           1032302
+## 2017Q3 1740355       1688645          39            691205
+## 2017Q4 1310278       1440802          39            633459
+## 2017Q5  294616        529478          14            269398
+## 2018Q6  219227        451610          10            226261
+##        Entering_Yr1_ACB Entering_Yr2 Entering_Yr3 Entering_Yr4
+## 2016Q1           721594      1034701       832969       504533
+## 2017Q2           686923       981812       856489       542691
+## 2017Q3           627393       680011       570421       349999
+## 2017Q4           600124       508011       400280       235233
+## 2017Q5           229219       107724        86154        36251
+## 2018Q6           195891        79592        63708        24187
+##        Entering_Yr5_OtherUndergrad Entering_Yr1_GradProf
+## 2016Q1                      168507                184309
+## 2017Q2                      213972                263840
+## 2017Q3                      168518                202565
+## 2017Q4                      141357                139476
+## 2017Q5                       34967                 57031
+## 2018Q6                       26049                 48960
+##        Continuing_GradProf Blank_GradeEntering Pursuing_1B Pursuing_2B
+## 2016Q1              317739                  54     3229784       46875
+## 2017Q2              407168                 128     2671579       50593
+## 2017Q3              351076                 165     1565893       44104
+## 2017Q4              257901                 158     1104595       34898
+## 2017Q5               77928                  97      291402       14537
+## 2018Q6               62233                  65      223330       10556
+##        Pursuing_AssocOccTech Purusing_AssocGenEDTransfer
+## 2016Q1                523284                      617567
+## 2017Q2                510064                      578681
+## 2017Q3                509929                      516194
+## 2017Q4                452820                      477981
+## 2017Q5                146595                      134646
+## 2018Q6                116607                      105029
+##        Pursuing_CTDipLessthan2 Pursuing_CTDipAtLeast2
+## 2016Q1                  149683                  69307
+## 2017Q2                  199971                  67970
+## 2017Q3                  224996                  67495
+## 2017Q4                  227670                  64415
+## 2017Q5                  110870                  20725
+## 2018Q6                  108607                  16456
+##        Pursuing_TeachingCredNondegree Pursuing_GradProfDegree
+## 2016Q1                          13246                  489536
+## 2017Q2                          18007                  634925
+## 2017Q3                          14502                  506073
+## 2017Q4                          14111                  348338
+## 2017Q5                           5203                  112106
+## 2018Q6                           4495                   91740
+##        Pursuing_OtherUndecided Pursuing_Blank Parent_NeitherCollege
+## 2016Q1                  262563          17473               2441283
+## 2017Q2                  237563          15972               2272327
+## 2017Q3                  177931          14236               1767945
+## 2017Q4                  176564          14607               1495664
+## 2017Q5                   56072           6613                499363
+## 2018Q6                   44599           5527                415969
+##        Parent_OneCollege Parent_BothCollege Pell_Eligible Pell_Ineligible
+## 2016Q1           1473636            1504399       2732418         2686900
+## 2017Q2           1350097            1362901       2346916         2638409
+## 2017Q3           1002614             870794       1748957         1892396
+## 2017Q4            791992             628343       1436234         1479765
+## 2017Q5            227922             171484        469787          428982
+## 2018Q6            180012             130965        399420          327526
+##        Dependent Independent Original_App Renewal_App Source_FOTW
+## 2016Q1   3147624     2271694      2645613     2773705     5411560
+## 2017Q2   2619089     2366236      2267326     2717999     4967934
+## 2017Q3   1490898     2150455      1907582     1733771     3613155
+## 2017Q4   1092756     1823243      1739216     1176783     2882478
+## 2017Q5    239624      659145       701328      197441      883447
+## 2018Q6    169068      557878       599720      127226      712919
+##        Source_WebFAA Source_OtherElectronic Source_PaperFAFSA
+## 2016Q1          4840                     27              2877
+## 2017Q2         11184                    294              5750
+## 2017Q3         20110                    829              7005
+## 2017Q4         25723                   1274              6187
+## 2017Q5         11248                    564              3397
+## 2018Q6         11561                    467              1920
+##        Source_PhoneFAFSA_or_FSAICcorrection FOG1_Schools FOG2_Schools
+## 2016Q1                                   14       627108       188432
+## 2017Q2                                  163       731781       157431
+## 2017Q3                                  254       780435       101247
+## 2017Q4                                  337       816711        78228
+## 2017Q5                                  113       358080        28428
+## 2018Q6                                   79       330150        20755
+##        FOG3_Schools FOG4_Schools FOG5_Schools FOG6_Schools FOG7_Schools
+## 2016Q1       180123       167057       146795       122839        97209
+## 2017Q2       106858        77122        55750        41768        29213
+## 2017Q3        51266        28610        17227        11338         6998
+## 2017Q4        37643        20725        13141         8716         6001
+## 2017Q5        15019         9459         6635         4862         3494
+## 2018Q6         9904         5333         3226         2039         1467
+##        FOG8_Schools FOG9_Schools FOG10_Schools NFOG1_Schools NFOG2_Schools
+## 2016Q1        81900        68645        180849       2947301        289102
+## 2017Q2        23990        18609         38856       3077621        296113
+## 2017Q3         5024         3808          5907       2256827        205143
+## 2017Q4         4411         3523          6661       1683518        133404
+## 2017Q5         2751         2256          4975        402726         32898
+## 2018Q6         1038          861          1467        309502         23149
+##        NFOG3_Schools NFOG4_Schools NFOG5_Schools NFOG6_Schools
+## 2016Q1        121411         68003         42265         27574
+## 2017Q2        126022         71826         44243         27953
+## 2017Q3         75056         37012         20753         12186
+## 2017Q4         47152         22520         12370          7405
+## 2017Q5         12029          5971          3337          2003
+## 2018Q6          8393          3886          2115          1260
+##        NFOG7_Schools NFOG8_Schools NFOG9_Schools NFOG10_Schools
+## 2016Q1         18793         13765         10639          19508
+## 2017Q2         18583         13553         10151          17882
+## 2017Q3          7753          5366          3791           5606
+## 2017Q4          4666          3215          2460           3529
+## 2017Q5          1264           858           700           1024
+## 2018Q6           784           580           445            592
+##        Parent_NoTaxes Parent_NotCompleteTaxes Parent_Filed_NoDataXfer
+## 2016Q1         175555                   29576                 1243454
+## 2017Q2         149037                   34886                 1438475
+## 2017Q3          99948                   14176                 1335586
+## 2017Q4          86430                   13486                  950384
+## 2017Q5          22981                    2358                  201106
+## 2018Q6          18757                    1539                  138133
+##        Parent_Filed_DataXfer Parent_UnknownFilingStatus Student_NoTaxes
+## 2016Q1               1652475                      46564          417628
+## 2017Q2                945884                      50807          446179
+## 2017Q3                    40                      41148          368562
+## 2017Q4                     0                      42456          346467
+## 2017Q5                     0                      13179          135534
+## 2018Q6                     0                      10639          123561
+##        Student_NotCompleteTaxes Student_Filed_NoDataXFer
+## 2016Q1                    20595                   620119
+## 2017Q2                    26661                  1008004
+## 2017Q3                    18222                  1763509
+## 2017Q4                    19277                  1457328
+## 2017Q5                     6523                   516982
+## 2018Q6                     5580                   428676
+##        Student_Filed_DataXfer Student_UnknownFilingStatus
+## 2016Q1                1213330                          22
+## 2017Q2                 885269                         123
+## 2017Q3                      0                         162
+## 2017Q4                      0                         171
+## 2017Q5                      0                         106
+## 2018Q6                      0                          61
+##        All_Applicants_Completion_Times Dep_OG_Full_CT Dep_OG_EZ_CT
+## 2016Q1                              32             53           44
+## 2017Q2                              32             51           43
+## 2017Q3                              31             48           40
+## 2017Q4                              31             48           40
+## 2017Q5                              28             45           37
+## 2018Q6                              25             40           32
+##        Dep_Ren_Full_CT Dep_Ren_EZ_CT Indep_OG_Full_CT Indep_OG_EZ_CT
+## 2016Q1              30            23               25             22
+## 2017Q2              35            26               27             22
+## 2017Q3              37            27               28             23
+## 2017Q4              38            27               29             24
+## 2017Q5              36            25               25             20
+## 2018Q6              34            24               23             18
+##        Indep_Ren_Full_CT Indep_Ren_EZ_CT
+## 2016Q1                14              11
+## 2017Q2                17              12
+## 2017Q3                20              15
+## 2017Q4                20              15
+## 2017Q5                19              13
+## 2018Q6                18              12
+```
+
+---
+# Subset Columns with select()
+
+- Hint: we just used this in the piping above
+- `Select` is used for **columns** of data; say we don't want all 80 columns
+- Use with ["helper functions"](https://r4ds.had.co.nz/transform.html#select) to match certain column name characteristics, reorder or rename columns
+- Drops all variables not explicitly named
+- Note use of the pipe vs "normal" function arguments
+
+
+```r
+only_gender &lt;- d_pipe_transposed %&gt;%
+  select(Female, Male, Gender_Blank)
+
+#alternate method without pipe
+only_gender_2 &lt;- select(d_pipe_transposed, Female, Male, Gender_Blank)
+
+print(only_gender)
+```
+
+```
+##                            Female    Male Gender_Blank
+## 2016Q1                    3346859 2040150        32309
+## 2017Q2                    3015893 1939148        30284
+## 2017Q3                    2227392 1388840        25121
+## 2017Q4                    1731193 1162832        21974
+## 2017Q5                     545359  340875        12535
+## 2018Q6                     445336  268456        13154
+## 2018Q7+                    240077  133720         8109
+## 2017_18_InitialTotal     11552109 7274021       143486
+## 2017_18_FinalTransaction 11585519 7276116       107981
+```
+
+---
+# Subset rows with filter()
+- `Filter()` is used for **rows** of data
+- Used to select rows that meet a given condition
+- Note that this condition was determined by inspection of the dataset; not robust
+
+
+```r
+only_quarters &lt;- only_gender %&gt;%
+  filter(Gender_Blank &lt; 100000)
+
+# non-pipe way
+only_quarters2 &lt;- filter(only_gender, Gender_Blank &lt; 100000)
+
+print(only_quarters)
+```
+
+```
+##    Female    Male Gender_Blank
+## 1 3346859 2040150        32309
+## 2 3015893 1939148        30284
+## 3 2227392 1388840        25121
+## 4 1731193 1162832        21974
+## 5  545359  340875        12535
+## 6  445336  268456        13154
+## 7  240077  133720         8109
+```
+
+---
+# Summarize() function
+- Collapses a dataframe to a single row
+- Generally paired with group_by() (change unit of analysis from full dataset to group)
+
+
+```r
+averages_gender &lt;- only_quarters %&gt;%
+  summarize(women_avg = mean(Female, na.rm = TRUE),
+            male_avg = mean(Male, na.rm = TRUE),
+            gender_blank_avg = mean(Gender_Blank, na.rm = TRUE))
+
+print(averages_gender)
+```
+
+```
+##   women_avg male_avg gender_blank_avg
+## 1   1650301  1039146            20498
+```
+
+Not that useful
+---
+# Mutate() function
+- `mutate()` is used to add new variables (specifically, columns that are functions of existing columns)
+- always adds columns to the end of a dataset
+- Let's create a variable for male-female ratio, for a male-female ratio &lt;0.5 (note you can refer to variables you just created), and for a non-response rate greater than the average (you can combine logical filtering through `ifelse()`)
+- `transmute()` works like mutate but lets you keep only the variables you just created
+
+
+```r
+gender_new &lt;- only_quarters %&gt;%
+  mutate(m_f_ratio = round(Male / Female, 2),
+         low_mf_ratio = ifelse(m_f_ratio &lt; 0.5, 1, 0),
+         high_nonresponse = ifelse(Gender_Blank &lt;= mean(Gender_Blank), 1, 0))
+
+gender_new
+```
+
+```
+##    Female    Male Gender_Blank m_f_ratio low_mf_ratio high_nonresponse
+## 1 3346859 2040150        32309      0.61            0                0
+## 2 3015893 1939148        30284      0.64            0                0
+## 3 2227392 1388840        25121      0.62            0                0
+## 4 1731193 1162832        21974      0.67            0                0
+## 5  545359  340875        12535      0.63            0                1
+## 6  445336  268456        13154      0.60            0                1
+## 7  240077  133720         8109      0.56            0                1
+```
+
+---
+# Group_by() function
+- applies dplyr verbs "by group"; the unit of analysis is now the group rather than the full data
+- really useful for categorical or dummy variable data, and useful in combination with summary; can also use with `filter()` to find group members that meet a given criteria or find groups in relation to a threshold, or `mutate()` to compute per group metrics
+- let's look at average applications grouped by either high response rate or low response rate
+
+
+```r
+averages_by_response &lt;- gender_new %&gt;%
+  group_by(high_nonresponse) %&gt;%
+  summarize(women_avg = mean(Female, na.rm = TRUE),
+            male_avg = mean(Male, na.rm = TRUE),
+            gender_blank_avg = mean(Gender_Blank, na.rm = TRUE))
+
+averages_by_response
+```
+
+```
+## # A tibble: 2 x 4
+##   high_nonresponse women_avg male_avg gender_blank_avg
+##              &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;            &lt;dbl&gt;
+## 1                0  2580334. 1632742.            27422
+## 2                1   410257.  247684.            11266
+```
+
+---
+# Combining Datasets
+
+Can use these functions:
+- `left_join()` to join matching rows from b to a
+- `right_join()` to join matching rows from a to b
+- `inner_join()` to retain only rows in both sets
+- `full_join()` to retain all values, all rows
+- `bind_rows()` to append z to y as new rows
+- `bind_cols()` to append z to y as new cols
+
+---
+# Takeaways
+
+### Wrangling is really task-dependent, but the core functions are similar (in tidyverse)
+---
+class: center, middle
+# Working on Online Exercises
+
+## http://ericdunford.com/ppol561/
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
